@@ -14,10 +14,11 @@
 #define COL_6 39
 #define COL_7 36
 
-#define DEBOUNCE 5
+#define DEBOUNCE 10
 
 #define NUM_KEYS 28
-int keys[NUM_KEYS];
+int32_t previousKeyState = 0;
+int32_t keyState = 0;
 
 void setup() {
   pinMode(ROW_0, OUTPUT);
@@ -38,64 +39,71 @@ void setup() {
 }
 
 void loop() {
-  Serial.println("Testing Rows!");
-
   int key = 0;
+
+  previousKeyState = keyState;
+  keyState = 0;
 
   digitalWrite(ROW_0, HIGH);
   delay(DEBOUNCE); // debounce for a few milliseconds
-  keys[key++] = digitalRead(COL_0);
-  keys[key++] = digitalRead(COL_1);
-  keys[key++] = digitalRead(COL_2);
-  keys[key++] = digitalRead(COL_3);
-  keys[key++] = digitalRead(COL_4);
-  keys[key++] = digitalRead(COL_5);
-  keys[key++] = digitalRead(COL_6);
-  keys[key++] = digitalRead(COL_7);
+  keyState |= (digitalRead(COL_0) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_1) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_2) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_3) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_4) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_5) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_6) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_7) ? 1 : 0) << key++;
   digitalWrite(ROW_0, LOW);
 
   digitalWrite(ROW_1, HIGH);
   delay(DEBOUNCE); // debounce for a few milliseconds
-  keys[key++] = digitalRead(COL_0);
-  keys[key++] = digitalRead(COL_1);
-  keys[key++] = digitalRead(COL_2);
-  keys[key++] = digitalRead(COL_3);
-  keys[key++] = digitalRead(COL_4);
-  keys[key++] = digitalRead(COL_5);
-  keys[key++] = digitalRead(COL_6);
-  keys[key++] = digitalRead(COL_7);
+  keyState |= (digitalRead(COL_0) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_1) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_2) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_3) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_4) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_5) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_6) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_7) ? 1 : 0) << key++;
   digitalWrite(ROW_1, LOW);
 
   digitalWrite(ROW_2, HIGH);
   delay(DEBOUNCE); // debounce for a few milliseconds
-  keys[key++] = digitalRead(COL_0);
-  keys[key++] = digitalRead(COL_1);
-  keys[key++] = digitalRead(COL_2);
-  keys[key++] = digitalRead(COL_3);
-  keys[key++] = digitalRead(COL_4);
-  keys[key++] = digitalRead(COL_5);
-  keys[key++] = digitalRead(COL_6);
-  keys[key++] = digitalRead(COL_7);
+  keyState |= (digitalRead(COL_0) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_1) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_2) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_3) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_4) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_5) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_6) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_7) ? 1 : 0) << key++;
   digitalWrite(ROW_2, LOW);
 
   digitalWrite(ROW_3, HIGH);
   delay(DEBOUNCE); // debounce for a few milliseconds
-  keys[key++] = digitalRead(COL_0);
-  keys[key++] = digitalRead(COL_1);
-  keys[key++] = digitalRead(COL_2);
-  keys[key++] = digitalRead(COL_3);
+  keyState |= (digitalRead(COL_0) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_1) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_2) ? 1 : 0) << key++;
+  keyState |= (digitalRead(COL_3) ? 1 : 0) << key++;
   digitalWrite(ROW_3, LOW);
 
-  Serial.println("Key States: ");
-  for(int i = 0; i < NUM_KEYS; i++) {
-    if(keys[i]) {
-      Serial.print("X");
-    } else {
-      Serial.print(" ");
-    }
-    Serial.print("|");
-  }
-  Serial.println("");
 
-  delay(2000);
+  if (previousKeyState != keyState) {
+    Serial.println(" A ^ B C ^ D ^ E F ^ G ^ A ^ B C ^ D ^ E F ^ G ^ A ^ B C ");
+    Serial.println(" 0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 ");
+    Serial.print("[");
+    for(int32_t i = 0; i < NUM_KEYS; i++) {
+      if(keyState & (1 << i)) {
+        Serial.print("X");
+      } else {
+        Serial.print(" ");
+      }
+
+      if (i < NUM_KEYS-1) {
+        Serial.print("|");
+      }
+    }
+    Serial.println("]");
+  }
 }
