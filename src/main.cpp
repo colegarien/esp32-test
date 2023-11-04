@@ -26,14 +26,14 @@ void setup() {
   pinMode(ROW_2, OUTPUT);
   pinMode(ROW_3, OUTPUT);
 
-  pinMode(COL_0, INPUT);
-  pinMode(COL_1, INPUT);
-  pinMode(COL_2, INPUT);
-  pinMode(COL_3, INPUT);
-  pinMode(COL_4, INPUT);
-  pinMode(COL_5, INPUT);
-  pinMode(COL_6, INPUT);
-  pinMode(COL_7, INPUT);
+  pinMode(COL_0, INPUT_PULLDOWN);
+  pinMode(COL_1, INPUT_PULLDOWN);
+  pinMode(COL_2, INPUT_PULLDOWN);
+  pinMode(COL_3, INPUT_PULLDOWN);
+  pinMode(COL_4, INPUT_PULLDOWN);
+  pinMode(COL_5, INPUT_PULLDOWN);
+  pinMode(COL_6, INPUT_PULLDOWN);
+  pinMode(COL_7, INPUT_PULLDOWN);
 
   Serial.begin(9600);
 }
