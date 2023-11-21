@@ -107,8 +107,8 @@ void loop() {
 
   if (previousKeyState != keyState) {
     std::string activeNotes = "[";
-    for(int32_t i = 0; i < NUM_KEYS; i++) {
-      int note = 0x21 + i; // start at A1
+    for(byte i = 0; i < NUM_KEYS; i++) {
+      byte note = 0x21 + i; // start at A1
       bool keyOn = keyState & (1 << i);
       bool prevKeyOn = previousKeyState & (1 << i);
       if (keyOn) {
