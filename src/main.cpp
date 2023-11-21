@@ -1,4 +1,8 @@
 #include <Arduino.h>
+#include <Arduino.h>
+#include <HardwareSerial.h>
+#include <MIDI.h>
+
 
 #define ROW_0 13
 #define ROW_1 12
@@ -20,6 +24,8 @@
 int32_t previousKeyState = 0;
 int32_t keyState = 0;
 
+MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, DIN_MIDI);
+
 void setup() {
   pinMode(ROW_0, OUTPUT);
   pinMode(ROW_1, OUTPUT);
@@ -36,6 +42,8 @@ void setup() {
   pinMode(COL_7, INPUT_PULLDOWN);
 
   Serial.begin(9600);
+  DIN_MIDI.begin(MIDI_CHANNEL_OMNI);
+  delay(300);
 }
 
 void loop() {
@@ -45,6 +53,8 @@ void loop() {
   keyState = 0;
 
   digitalWrite(ROW_0, HIGH);
+  // Read incoming messages
+  DIN_MIDI.read();
   delay(DEBOUNCE); // debounce for a few milliseconds
   keyState |= (digitalRead(COL_0) ? 1 : 0) << key++;
   keyState |= (digitalRead(COL_1) ? 1 : 0) << key++;
@@ -57,6 +67,8 @@ void loop() {
   digitalWrite(ROW_0, LOW);
 
   digitalWrite(ROW_1, HIGH);
+  // Read incoming messages
+  DIN_MIDI.read();
   delay(DEBOUNCE); // debounce for a few milliseconds
   keyState |= (digitalRead(COL_0) ? 1 : 0) << key++;
   keyState |= (digitalRead(COL_1) ? 1 : 0) << key++;
@@ -69,6 +81,8 @@ void loop() {
   digitalWrite(ROW_1, LOW);
 
   digitalWrite(ROW_2, HIGH);
+  // Read incoming messages
+  DIN_MIDI.read();
   delay(DEBOUNCE); // debounce for a few milliseconds
   keyState |= (digitalRead(COL_0) ? 1 : 0) << key++;
   keyState |= (digitalRead(COL_1) ? 1 : 0) << key++;
@@ -81,6 +95,8 @@ void loop() {
   digitalWrite(ROW_2, LOW);
 
   digitalWrite(ROW_3, HIGH);
+  // Read incoming messages
+  DIN_MIDI.read();
   delay(DEBOUNCE); // debounce for a few milliseconds
   keyState |= (digitalRead(COL_0) ? 1 : 0) << key++;
   keyState |= (digitalRead(COL_1) ? 1 : 0) << key++;
@@ -90,20 +106,32 @@ void loop() {
 
 
   if (previousKeyState != keyState) {
-    Serial.println(" A ^ B C ^ D ^ E F ^ G ^ A ^ B C ^ D ^ E F ^ G ^ A ^ B C ");
-    Serial.println(" 0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 ");
-    Serial.print("[");
+    std::string activeNotes = "[";
     for(int32_t i = 0; i < NUM_KEYS; i++) {
-      if(keyState & (1 << i)) {
-        Serial.print("X");
+      int note = 0x21 + i; // start at A1
+      bool keyOn = keyState & (1 << i);
+      bool prevKeyOn = previousKeyState & (1 << i);
+      if (keyOn) {
+        activeNotes += "X";
+        if (!prevKeyOn) {
+          DIN_MIDI.sendNoteOn(note, 63, 1);
+        }
       } else {
-        Serial.print(" ");
+        activeNotes += " ";
+        if (prevKeyOn) {
+          DIN_MIDI.sendNoteOn(note, 0, 1);
+        }
       }
 
       if (i < NUM_KEYS-1) {
-        Serial.print("|");
+        activeNotes += "|";
       }
     }
-    Serial.println("]");
+    activeNotes += "]";
+    Serial.println(" A ^ B C ^ D ^ E F ^ G ^ A ^ B C ^ D ^ E F ^ G ^ A ^ B C \n 0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 4 5 6 7|0 1 2 3 ");
+    Serial.println(activeNotes.c_str());
   }
+
+  // Read incoming messages
+  DIN_MIDI.read();
 }
